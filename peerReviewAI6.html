@@ -1,0 +1,1007 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Distance Education Course Peer Review</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #DADAD8;
+      --ink: #42503D;
+      --ink-muted: #5a6a51;
+      --accent: #0B462B;
+      --panel: #ffffff;
+      --danger: #b91c1c;
+      --focus: #93c5fd;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font-family: "Josefin Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      line-height: 1.45;
+    }
+
+    .center { max-width: 860px; margin: 2rem auto 4rem auto; padding: 0 1rem; }
+
+    .heading-hero { text-align: center; }
+    .heading-hero h1 { font-size: clamp(1.4rem, 2.4vw, 1.8rem); margin: .25rem 0; }
+    .heading-hero p { font-size: 1.1rem; color: var(--ink-muted); margin: .25rem 0 1rem 0; }
+
+    hr { border: 0; border-top: 1px solid var(--accent); margin: 1.25rem 0; }
+
+    .panel { background: var(--panel); border-radius: var(--radius); box-shadow: 0 8px 24px rgba(0,0,0,.08); padding: 1.25rem; }
+
+    input[type="text"], input[type="email"], select, textarea {
+      width: 100%; padding: .75rem .9rem; margin: .25rem 0 .75rem 0;
+      border: 1.5px solid var(--ink); border-radius: 10px; background: var(--bg); color: var(--ink);
+      font-size: 1rem;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    input[type="text"]:focus, input[type="email"]:focus, select:focus, textarea:focus {
+      outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--focus);
+    }
+
+    label { font-weight: 600; display: inline-block; margin-top: .25rem; }
+    .row { display: grid; grid-template-columns: 1fr; gap: .5rem; }
+
+    .actions { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: flex-end; margin-top: 1rem; }
+    .btn {
+      background: var(--accent); color: #fff; border: 0; border-radius: 10px; cursor: pointer;
+      padding: .8rem 1.2rem; font-weight: 700; font-size: 1rem;
+    }
+    .btn.secondary{ background: #374151; }
+    .btn[disabled] { opacity: .6; cursor: not-allowed; }
+
+    .status { display: none; margin-top: .75rem; padding: .75rem 1rem; border-radius: 10px; font-weight: 700; }
+    .status.ok { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+    .status.err { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+    .collapsible { width: 100%; border: 2px solid var(--ink); color: var(--ink); background: transparent; padding: 12px 14px; text-align: left; cursor: pointer; font-size: 1.25rem; border-radius: 10px; }
+    .collapsible:hover, .collapsible.active { background: var(--ink); color: #fff; }
+    .content { display: none; overflow: hidden; padding: 10px 5px 5px 5px; }
+
+    fieldset { border: 2px solid #DADAD8; border-radius: 10px; padding: .75rem .75rem .5rem .75rem; margin-bottom: 1rem; }
+    fieldset.error { border-color: #e11d48; }
+    legend { padding: 0 .4rem; font-weight: 700; }
+
+    .hint { color: var(--ink-muted); font-size: .95rem; margin-top: -.5rem; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 1px, 1px); white-space: nowrap; border: 0; }
+
+    .badge { display:inline-block; padding:.35rem .6rem; border-radius:9999px; font-weight:700; font-size:.9rem; }
+    .badge.ok { background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }
+    .badge.no { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
+
+    /* Computed Substantive status pill */
+    .pill { display:inline-block; padding:.35rem .6rem; border-radius:9999px; font-weight:700; font-size:.9rem; }
+    .pill.ok { background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }
+    .pill.no { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
+
+    /* Ensure hidden attribute reliably hides collapsible content */
+    .content[hidden]{ display:none !important; }
+
+    .error-text { color:#991b1b; font-size:.9rem; margin-top:-.25rem }
+    .input-invalid { border-color:#e11d48 !important; box-shadow:0 0 0 3px rgba(225,29,72,.15) }
+
+
+
+
+
+
+/* Substantive Interaction visual states */
+#substantiveBorder.substantive-ok {
+  background: #ecfdf5;           /* light green */
+  border-color: #34d399;         /* green border */
+  box-shadow: inset 0 0 0 3px rgba(16,185,129,.18);
+}
+
+#substantiveBorder.substantive-no {
+  background: #fef2f2;           /* light red */
+  border-color: #fca5a5;         /* red border */
+  box-shadow: inset 0 0 0 3px rgba(239,68,68,.12);
+}
+
+
+
+
+
+
+
+
+
+
+  </style>
+
+  <!-- Term/Year combiner -->
+  <script>
+  (function(){
+    function initTermYear() {
+      var termEl = document.getElementById('semester_term');
+      var yearEl = document.getElementById('semester_year');
+      var hidden = document.getElementById('semester');
+      var form   = document.getElementById('theForm');
+      if (!termEl || !yearEl || !hidden) return;
+
+      function sync() {
+        var t = termEl.value || '';
+        var y = yearEl.value || '';
+        hidden.value = (t && y) ? (t + ' ' + y) : '';
+      }
+      var currentYear = String(new Date().getFullYear());
+      var hasYear = Array.from(yearEl.options).some(function(o){ return o.value === currentYear || o.text === currentYear; });
+      if (hasYear) yearEl.value = currentYear;
+
+      termEl.addEventListener('change', sync);
+      yearEl.addEventListener('change', sync);
+
+      if (form) form.addEventListener('reset', function(){ setTimeout(function(){ if (hasYear) yearEl.value = currentYear; sync(); }, 0); });
+      sync();
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initTermYear);
+    else initTermYear();
+  })();
+  </script>
+
+  <!-- Email validation (kept) -->
+  <script>
+  (function(){
+    function initEmailValidation() {
+      var form  = document.getElementById('theForm');
+      var email = document.getElementById('instructor_email');
+      var msg   = document.getElementById('instructor_email_msg');
+      if (!form || !email || !msg) return;
+
+      var EMAIL_RX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+      var REQUIRED_DOMAIN = null; // e.g., 'hancockcollege.edu'
+
+      function setError(text){
+        if (text) { email.classList.add('input-invalid'); msg.textContent = text; }
+        else { email.classList.remove('input-invalid'); msg.textContent = ''; }
+      }
+      function check(){
+        var v = (email.value || '').trim();
+        var error = '';
+        if (!v) error = 'Please enter an email address.';
+        else if (!EMAIL_RX.test(v)) error = 'Enter a valid email address (e.g., name@domain.com).';
+        else if (REQUIRED_DOMAIN && !v.toLowerCase().endsWith('@' + REQUIRED_DOMAIN)) error = 'Please use your ' + REQUIRED_DOMAIN + ' address.';
+        setError(error);
+        return !error;
+      }
+      email.addEventListener('input', check);
+      email.addEventListener('blur', check);
+      form.addEventListener('submit', function(e){
+        if (!check()) { e.preventDefault(); e.stopImmediatePropagation(); email.focus(); }
+      });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initEmailValidation);
+    else initEmailValidation();
+  })();
+  </script>
+
+  <!-- Department → Discipline -->
+  <script>
+  (function(){
+    function initDeptDiscipline() {
+      var deptSelect = document.getElementById('dept');
+      var disciplineSelect = document.getElementById('discipline');
+      var otherRow = document.getElementById('disciplineOtherRow');
+      var otherInput = document.getElementById('discipline_other');
+      var theForm = document.getElementById('theForm');
+      if (!deptSelect || !disciplineSelect) return;
+
+      var DISCIPLINES = {
+        "Applied Behavioral Sciences": ["Psychology","Sociology","Early Childhood Studies","Human Services","Other"],
+        "Business": ["Accounting","Business Administration","Entrepreneurship","Marketing","Management","Other"],
+        "Community Education": ["ESL (Noncredit)","Adult Education","Other"],
+        "English": ["Composition","Literature","Creative Writing","Other"],
+        "Fine Arts": ["Art","Music","Theatre Arts","Photography","Other"],
+        "Health Sciences": ["Nursing","Allied Health","Public Health","Other"],
+        "Industrial Technology": ["Automotive","Welding","Electronics","Construction Technology","Other"],
+        "Kinesiology, Recreation, and Athletics": ["Kinesiology","Recreation","Athletics","Other"],
+        "Languages and Communication": ["Communication Studies","Spanish","ASL","Other"],
+        "Life and Physical Sciences": ["Biology","Chemistry","Physics","Earth Science","Other"],
+        "Mathematical Sciences": ["Mathematics","Statistics","Computer Science","Other"],
+        "Public Safety": ["Fire Technology","Law Enforcement","EMT/Paramedic","Other"],
+        "Social and Behavioral Sciences": ["History","Political Science","Anthropology","Economics","Geography","Other"]
+      };
+
+      function clearChildren(el){ while (el.firstChild) el.removeChild(el.firstChild); }
+      function toggleOther(show){
+        if (!otherRow || !otherInput) return;
+        otherRow.style.display = show ? 'block' : 'none';
+        otherInput.toggleAttribute('required', show);
+        if (!show) otherInput.value = '';
+      }
+      function loadDisciplinesFor(dept){
+        clearChildren(disciplineSelect);
+        var placeholder = document.createElement('option');
+        if (!dept || !DISCIPLINES[dept]) {
+          placeholder.value = '';
+          placeholder.textContent = 'Select a department first…';
+          disciplineSelect.appendChild(placeholder);
+          disciplineSelect.disabled = true;
+          toggleOther(false);
+          return;
+        }
+        placeholder.value = '';
+        placeholder.textContent = 'Select a discipline…';
+        disciplineSelect.appendChild(placeholder);
+        DISCIPLINES[dept].forEach(function(name){
+          var opt = document.createElement('option');
+          opt.value = name; opt.textContent = name;
+          disciplineSelect.appendChild(opt);
+        });
+        disciplineSelect.disabled = false;
+        toggleOther(false);
+      }
+      deptSelect.addEventListener('change', function(){ loadDisciplinesFor(deptSelect.value); });
+      disciplineSelect.addEventListener('change', function(){ toggleOther(disciplineSelect.value === 'Other'); });
+
+      if (theForm) theForm.addEventListener('reset', function(){ setTimeout(function(){ loadDisciplinesFor(deptSelect.value); }, 0); });
+      loadDisciplinesFor(deptSelect.value);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initDeptDiscipline);
+    else initDeptDiscipline();
+  })();
+  </script>
+
+
+
+
+
+
+
+
+<script>
+function updateSubstantiveStatus(){
+  var pill = document.getElementById('substantiveStatus');
+  var fs   = document.getElementById('substantiveBorder');
+  var r    = (function computeRSI(){
+    var names = ['selectA1','selectA2','selectA3','selectA4','selectA5'];
+    var count = 0; for (var i=0;i<names.length;i++){ 
+      var els = document.querySelectorAll('input[name="'+names[i]+'"]');
+      for (var j=0;j<els.length;j++){ if (els[j].checked && els[j].value==='yes') { count++; break; } }
+    }
+    return { meets: count >= 2, count: count };
+  })();
+
+  // Update pill text & style (existing behavior)
+  if (pill){
+    pill.className = 'pill ' + (r.meets ? 'ok' : 'no');
+    pill.textContent = r.meets
+      ? ('Meets (Evidence ' + r.count + '/5)')
+      : ('Does Not Meet (requires ≥ 2 of items 1–5; current: ' + r.count + '/5)');
+  }
+
+  // NEW: color the whole fieldset
+  if (fs){
+    fs.classList.remove('substantive-ok','substantive-no');
+    fs.classList.add(r.meets ? 'substantive-ok' : 'substantive-no');
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body>
+  <div class="center">
+    <div class="heading-hero">
+      <p class="p1" style="font-size: 18pt; font-weight: 700;">Rubric for Assessing Regular and Substantive Interaction in Distance Education Courses</p>
+      <hr />
+      <p class="p1" style="font-size: 16pt; font-weight: 700;">Distance Education Course Peer Review</p>
+      <hr />
+    </div>
+
+    
+
+<form id="theForm" name="theForm" 
+ action="https://formspree.io/f/xandldog"
+  method="POST" novalidate>
+
+
+
+
+      <input type="text" name="_gotcha" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <input type="hidden" name="_format" value="json" />
+      <input type="hidden" name="_subject" value="New DE Peer Review submission" />
+
+      <!-- Overall RSI badge + hidden result for submission -->
+      <div id="rsiBadge" class="badge no" aria-live="polite" style="margin:.5rem 0">Does Not Meet RSI</div>
+      <input type="hidden" name="rsi_overall" id="rsi_overall" />
+
+      <div class="panel">
+        <button type="button" class="collapsible" aria-expanded="false">Purpose/Rationale</button>
+        <div class="content" aria-hidden="true" hidden>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <p>Both Federal and State regulations require that educational institutions have processes in place to ensure that courses conducted through distance education include regular and substantive interaction between the instructor(s) and students, and among students where applicable.</p>
+          <p>Title 5 also recognizes that “regular and substantive contact” is an academic and professional matter, and therefore, within the purview of local academic senates.</p>
+          <p>Allan Hancock College Academic Senate, in collegial consultation with the administration, has developed a Distance Education Course Peer Review Process, which includes the use of the attached rubric to regularly assess distance education courses within programs, and to ensure that the federal and state criteria for regular and substantive interaction are being met.</p>
+	<p>All distance education courses within a program should be assessed at least once within the six-year program review cycle. Ideally, a relevant sample of every course should be assessed during this cycle. This assessment should be done using the Rubric for Assessing Regular and Substantive Interaction in Distance Education Courses (attached). </p>
+
+	<p>The results of this assessment should be maintained by programs and/or departments so that they can be accessed by faculty when conducting program review. </p>
+
+	<p>Furthermore, the goal of this course peer review process and accompanying rubric goes beyond ensuring compliance with federal and state regulations. It is also an opportunity for programs to share ideas and best practices that can be used to improve other distance education sections of that course, other courses within the program, as well as other courses in related/applicable programs within the department. </p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <table align="center" border="0" cellpadding="0" cellspacing="0" id="general" width="800">
+            <tr>
+              <td colspan="5"><span style="font-weight: bold; border: 2px solid #42503D; color: #ffffff; padding: 5px; background-color: #42503D;">References: </span></td>
+            </tr>
+          </table>
+          <ul>
+            <li><a href="">Rubric Information and Guidance</a></li>
+            <li><a href="">AHC Regular and Substantive Contact Policy</a></li>
+            <li><a href="">AHC Administrative Procedure (AP) 4105 - Distance Education</a></li>
+            <li><a href="">Course Design Rubric - Unabridged</a></li>
+            <li><a href="">Course Design Rubric - Section B only (Regular and Substantive Contact)</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <hr />
+
+      <div class="panel">
+        <div class="row">
+          <label for="course">Course <span aria-hidden="true" style="color:var(--danger)">*</span></label>
+          <input type="text" id="course" name="course" placeholder="e.g., ACCT 110" required />
+        </div>
+
+        <!-- Semester + Year -->
+        <div class="row">
+          <label for="semester_term">Semester <span aria-hidden="true" style="color:#b91c1c">*</span></label>
+          <div class="row" style="grid-template-columns: 1fr 1fr; gap: .5rem;">
+            <select id="semester_term" name="semester_term" required>
+              <option value="" disabled selected>Select term…</option>
+              <option>Spring</option>
+              <option>Summer</option>
+              <option>Fall</option>
+              <option>Winter</option>
+            </select>
+            <select id="semester_year" name="semester_year" required>
+              <option value="" disabled>Select year…</option>
+              <option>2025</option>
+              <option>2026</option>
+              <option>2027</option>
+              <option>2028</option>
+              <option>2029</option>
+            </select>
+          </div>
+        </div>
+        <input type="hidden" id="semester" name="semester">
+
+        <div class="row">
+          <label for="reviewer">Reviewer <span aria-hidden="true" style="color:var(--danger)">*</span></label>
+          <input type="text" id="reviewer" name="reviewer" required />
+        </div>
+        <div class="row">
+          <label for="dept">Department <span aria-hidden="true" style="color:var(--danger)">*</span></label>
+          <select id="dept" name="dept" required>
+            <option value="" selected disabled>Select a department…</option>
+            <option>Applied Behavioral Sciences</option>
+            <option>Business</option>
+            <option>Community Education</option>
+            <option>English</option>
+            <option>Fine Arts</option>
+            <option>Health Sciences</option>
+            <option>Industrial Technology</option>
+            <option>Kinesiology, Recreation, and Athletics</option>
+            <option>Languages and Communication</option>
+            <option>Life and Physical Sciences</option>
+            <option>Mathematical Sciences</option>
+            <option>Public Safety</option>
+            <option>Social and Behavioral Sciences</option>
+          </select>
+        </div>
+
+        <!-- Discipline (auto-populates based on Department) -->
+        <div class="row">
+          <label for="discipline">Discipline <span aria-hidden="true" style="color:#b91c1c">*</span></label>
+          <select id="discipline" name="discipline" required disabled>
+            <option value="" selected>Select a department first…</option>
+          </select>
+        </div>
+        <div class="row" id="disciplineOtherRow" style="display:none">
+          <label for="discipline_other">Discipline (Other)</label>
+          <input id="discipline_other" name="discipline_other" type="text" placeholder="Type discipline…" />
+        </div>
+
+        <div class="row">
+          <label for="instructor_name">Instructor name <span aria-hidden="true" style="color:#b91c1c">*</span></label>
+          <input id="instructor_name" name="instructor_name" type="text" required />
+        </div>
+        <div class="row">
+          <label for="instructor_email">Instructor email <span aria-hidden="true" style="color:#b91c1c">*</span></label>
+          <input id="instructor_email" name="instructor_email" type="email" required autocomplete="email" inputmode="email" placeholder="name@domain.com" />
+          <div id="instructor_email_msg" class="error-text" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <hr />
+
+      <div class="panel">
+        <p style="font-size: 18pt; font-weight: 700; text-align:center;">Part I: Regular and Substantive Interaction – Instructor Contact</p>
+
+        <!-- COMPUTED (no radios): Substantive Interaction -->
+        <fieldset id="substantiveBorder">
+          <legend>A. Substantive Interaction</legend>
+          <p>The course shows clear evidence of engaging students in teaching, learning, and assessment that is consistent with the content under discussion.</p>
+          <div id="substantiveStatus" class="pill no" role="status" aria-live="polite">
+            Does Not Meet (requires ≥ 2 of items 1–5)
+          </div>
+        </fieldset>
+
+        <p style="font-size: 18pt; font-weight: 700;">The course shows evidence of at least two of the following:</p>
+
+        <fieldset id="directIntruct">
+          <legend>1. Direct Instruction</legend>
+          <p>The course provides direct instruction.</p>
+          <label><input type="radio" id="directIntructionYes" name="selectA1" value="yes" /> Yes</label>
+          <label><input type="radio" id="directIntructionNo"  name="selectA1" value="no"  /> No</label>
+          <button type="button" class="collapsible" aria-expanded="false">Explanation and/or examples</button>
+          <div class="content" aria-hidden="true" hidden>
+            <textarea id="A11" name="A11" placeholder="Add examples or details…"></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset id="feedback">
+          <legend>2. Assessment & Feedback</legend>
+          <p>The course shows clear evidence of assessment and feedback on students’ coursework.</p>
+          <label><input type="radio" id="feedbackYes" name="selectA2" value="yes" /> Yes</label>
+          <label><input type="radio" id="feedbackNo"  name="selectA2" value="no"  /> No</label>
+          <button type="button" class="collapsible" aria-expanded="false">Explanation and/or examples</button>
+          <div class="content" aria-hidden="true" hidden>
+            <textarea id="A21" name="A21" placeholder="Add examples or details…"></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset id="infoRespond">
+          <legend>3. Providing information or responding to questions</legend>
+          <p>The course shows clear evidence of responses to student questions about the course.</p>
+          <label><input type="radio" id="infoRespondingYes" name="selectA3" value="yes" /> Yes</label>
+          <label><input type="radio" id="infoRespondingNo"  name="selectA3" value="no"  /> No</label>
+          <button type="button" class="collapsible" aria-expanded="false">Explanation and/or examples</button>
+          <div class="content" aria-hidden="true" hidden>
+            <textarea id="A31" name="A31" placeholder="Add examples or details…"></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset id="groupDiscuss">
+          <legend>4. Facilitating group discussion</legend>
+          <p>The course shows clear evidence of facilitating group discussions regarding course content or competencies.</p>
+          <label><input type="radio" id="groupDiscussionYes" name="selectA4" value="yes" /> Yes</label>
+          <label><input type="radio" id="groupDiscussionNo"  name="selectA4" value="no"  /> No</label>
+          <button type="button" class="collapsible" aria-expanded="false">Explanation and/or examples</button>
+          <div class="content" aria-hidden="true" hidden>
+            <textarea id="A41" name="A41" placeholder="Add examples or details…"></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset id="other">
+          <legend>5. Other instructional activities</legend>
+          <p>Other instructional activities approved by the college or accrediting agency.</p>
+          <label><input type="radio" id="otherYes" name="selectA5" value="yes" /> Yes</label>
+          <label><input type="radio" id="otherNo"  name="selectA5" value="no"  /> No</label>
+          <button type="button" class="collapsible" aria-expanded="false">Explanation and/or examples</button>
+          <div class="content" aria-hidden="true" hidden>
+            <textarea id="A51" name="A51" placeholder="Add examples or details…"></textarea>
+          </div>
+        </fieldset>
+      </div>
+
+      <hr />
+
+      <div class="panel">
+        <p style="font-size: 18pt; font-weight: 700;">B. Regular Interaction</p>
+
+        <fieldset id="predictable">
+          <legend>1. Predictable & scheduled interaction</legend>
+          <p>The course provides opportunities for substantive interaction on a predictable and scheduled basis.</p>
+          <label><input type="radio" id="predictableYes" name="predictableSch" value="yes" /> Yes</label>
+          <label><input type="radio" id="predictableNo"  name="predictableSch" value="no"  /> No</label>
+          <button type="button" class="collapsible" aria-expanded="false">Explanation and/or examples</button>
+          <div class="content" aria-hidden="true" hidden>
+            <textarea id="B11" name="B11" placeholder="Add examples or details…"></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset id="monitorEngagement">
+          <legend>2. Monitoring engagement & proactive interaction</legend>
+          <p>The course monitors student engagement and success and engages in interaction based on that monitoring or upon request by students.</p>
+          <label><input type="radio" id="monitorEngagementYes" name="monitoringEngagement" value="yes" /> Yes</label>
+          <label><input type="radio" id="monitorEngagementNo"  name="monitoringEngagement" value="no"  /> No</label>
+          <button type="button" class="collapsible" aria-expanded="false">Explanation and/or examples</button>
+          <div class="content" aria-hidden="true" hidden>
+            <textarea id="B21" name="B21" placeholder="Add examples or details…"></textarea>
+          </div>
+        </fieldset>
+      </div>
+
+      <hr />
+
+      <div class="panel">
+        <p style="font-size: 18pt; font-weight: 700; text-align:center;">Part II: Regular and Substantive Interaction (Student-to-Student)</p>
+
+        <fieldset id="studentOne">
+          <legend>1. Opportunities to initiate interaction</legend>
+          <p>The course provides opportunities for students to initiate interaction with other students.</p>
+          <label><input type="radio" id="interactionStudentYes" name="interactionStudent" value="yes" /> Yes</label>
+          <label><input type="radio" id="interactionStudentNo"  name="interactionStudent" value="no"  /> No</label>
+          <button type="button" class="collapsible" aria-expanded="false">Explanation and/or examples</button>
+          <div class="content" aria-hidden="true" hidden>
+            <textarea id="C11" name="C11" placeholder="Add examples or details…"></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset id="studentTwo">
+          <legend>2. Regular & substantive interaction among students</legend>
+          <p>The course provides opportunities for students to engage in regular and substantive interaction with other students.</p>
+          <label><input type="radio" id="regularInteractionStudentYes" name="regularInteractionStudent" value="yes" /> Yes</label>
+          <label><input type="radio" id="regularInteractionStudentNo"  name="regularInteractionStudent" value="no"  /> No</label>
+          <button type="button" class="collapsible" aria-expanded="false">Explanation and/or examples</button>
+          <div class="content" aria-hidden="true" hidden>
+            <textarea id="C21" name="C21" placeholder="Add examples or details…"></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset id="studentThree">
+          <legend>3. Participation guidance & evaluation</legend>
+          <p>The course provides guidelines explaining levels of participation and how participation will be evaluated.</p>
+          <label><input type="radio" id="ProvidingGideanceYes" name="ProvidingGideance" value="yes" /> Yes</label>
+          <label><input type="radio" id="ProvidingGideanceNo"  name="ProvidingGideance" value="no"  /> No</label>
+          <button type="button" class="collapsible" aria-expanded="false">Explanation and/or examples</button>
+          <div class="content" aria-hidden="true" hidden>
+            <textarea id="C31" name="C31" placeholder="Add examples or details…"></textarea>
+          </div>
+        </fieldset>
+      </div>
+
+      <hr />
+
+      <div class="panel">
+        <p style="font-size: 18pt; font-weight: 700;">Follow Up: Conversation</p>
+        <div class="row">
+          <label for="D1">Exceptional techniques/methods reviewed that improve RSI</label>
+          <textarea id="D1" name="D1" placeholder="Notes…"></textarea>
+        </div>
+        <div class="row">
+          <label for="D2">Possible changes discussed that may improve RSI</label>
+          <textarea id="D2" name="D2" placeholder="Notes…"></textarea>
+        </div>
+        <div class="row">
+          <label for="D3">Methods/techniques/adoptions that will be employed to improve RSI</label>
+          <textarea id="D3" name="D3" placeholder="Notes…"></textarea>
+        </div>
+        <div class="actions">
+          <button id="submitBtn" type="submit" class="btn">Submit</button>
+          <button id="summaryBtn" type="button" class="btn secondary">Preview / Print Summary</button>
+        </div>
+        <div id="status-ok" class="status ok" role="status" aria-live="polite">Thanks! Your submission was received. <button id="summaryLink" type="button" class="btn secondary" style="padding:.4rem .7rem;font-size:.9rem;margin-left:.5rem">View Summary</button></div>
+        <div id="status-err" class="status err" role="alert" aria-live="assertive">Sorry—something went wrong. Please try again.</div>
+      </div>
+    </form>
+
+    <p class="hint" style="margin-top:1rem">Reference: 34 CFR 600.2 (definition of Regular and Substantive Interaction); Title 5 § 55204 (Instructor Contact).</p>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function(){
+    function $(sel){ return document.querySelector(sel); }
+    function $all(sel){ return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+
+    // --- Utilities ---
+    function show(el){ if (el) el.style.display = 'block'; }
+    function hide(el){ if (el) el.style.display = 'none'; }
+    function getRadio(name){
+      var els = document.querySelectorAll('input[name="' + name + '"]');
+      for (var i=0;i<els.length;i++){ if (els[i].checked) return els[i].value; }
+      return '';
+    }
+    function ynToText(v){ return v === 'yes' ? 'Meets' : v === 'no' ? 'Does Not Meet' : '—'; }
+    function esc(v){ return (v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    // --- Collapsibles ---
+    function attachToggles(){
+      var btns = $all('.collapsible');
+      btns.forEach(function(btn){
+        var content = null;
+        if (btn.dataset && btn.dataset.target){ content = document.getElementById(btn.dataset.target); }
+        if (!content){
+          var node = btn.nextSibling;
+          while (node && !(node.classList && node.classList.contains('content'))){ node = node.nextSibling; }
+          if (node && node.classList && node.classList.contains('content')) content = node;
+        }
+        if (!content && btn.parentElement){ content = btn.parentElement.querySelector('.content'); }
+        if (!content) return;
+
+        btn.setAttribute('aria-expanded','false');
+        content.setAttribute('hidden',''); content.style.display = 'none';
+
+        btn.addEventListener('click', function(){
+          var isHidden = content.hasAttribute('hidden');
+          btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+          btn.classList.toggle('active', isHidden);
+          if (isHidden){ content.removeAttribute('hidden'); content.style.display = 'block'; }
+          else { content.setAttribute('hidden',''); content.style.display = 'none'; }
+        });
+      });
+    }
+    attachToggles();
+
+    // --- Radio-group validation (fieldset highlights) ---
+    function markFsError(id){ var fs = document.getElementById(id); if (fs) fs.classList.add('error'); }
+    function clearFsError(id){ var fs = document.getElementById(id); if (fs) fs.classList.remove('error'); }
+    var radioGroups = [
+      { ids: ['directIntructionYes','directIntructionNo'], fs: 'directIntruct' },
+      { ids: ['feedbackYes','feedbackNo'], fs: 'feedback' },
+      { ids: ['infoRespondingYes','infoRespondingNo'], fs: 'infoRespond' },
+      { ids: ['groupDiscussionYes','groupDiscussionNo'], fs: 'groupDiscuss' },
+      { ids: ['otherYes','otherNo'], fs: 'other' },
+      { ids: ['predictableYes','predictableNo'], fs: 'predictable' },
+      { ids: ['monitorEngagementYes','monitorEngagementNo'], fs: 'monitorEngagement' },
+      { ids: ['interactionStudentYes','interactionStudentNo'], fs: 'studentOne' },
+      { ids: ['regularInteractionStudentYes','regularInteractionStudentNo'], fs: 'studentTwo' },
+      { ids: ['ProvidingGideanceYes','ProvidingGideanceNo'], fs: 'studentThree' }
+    ];
+    function radiosValid(){
+      var ok = true;
+      for (var i=0;i<radioGroups.length;i++){
+        var g = radioGroups[i], any = false;
+        for (var j=0;j<g.ids.length;j++){
+          var el = document.getElementById(g.ids[j]);
+          if (el && el.checked){ any = true; break; }
+        }
+        if (!any){ markFsError(g.fs); ok = false; } else { clearFsError(g.fs); }
+      }
+      return ok;
+    }
+
+    // --- Computed RSI (A1–A5) ---
+    function computeRSI(){
+      var names = ['selectA1','selectA2','selectA3','selectA4','selectA5'];
+      var count = 0; for (var i=0;i<names.length;i++){ if (getRadio(names[i]) === 'yes') count++; }
+      return { meets: count >= 2, count: count };
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function updateRSIBadge(){
+      var badge = document.getElementById('rsiBadge');
+      var hidden = document.getElementById('rsi_overall');
+      var r = computeRSI();
+      if (badge){
+        badge.className = 'badge ' + (r.meets ? 'ok' : 'no');
+        badge.textContent = r.meets
+          ? ('Meets RSI (Evidence ' + r.count + '/5)')
+          : ('Does Not Meet RSI (Evidence ' + r.count + '/5)');
+      }
+      if (hidden) hidden.value = r.meets ? 'Meets RSI' : 'Does Not Meet RSI';
+    }
+
+    ['selectA1','selectA2','selectA3','selectA4','selectA5'].forEach(function(name){
+      $all('input[name="'+name+'"]').forEach(function(el){
+        el.addEventListener('change', function(){ updateRSIBadge(); updateSubstantiveStatus(); });
+      });
+    });
+    updateRSIBadge();
+    updateSubstantiveStatus();
+
+    // --- Inline field validation for text/selects ---
+    var form = document.getElementById('theForm');
+
+    function setFieldError(el, msg){
+      el.classList.add('input-invalid');
+      el.setAttribute('aria-invalid','true');
+
+      // Use dedicated email message container if present
+      if (el.id === 'instructor_email') {
+        var emailMsg = document.getElementById('instructor_email_msg');
+        if (emailMsg) emailMsg.textContent = msg;
+        return;
+      }
+
+      // Reuse or create a sibling inline error
+      var next = el.nextElementSibling;
+      if (!(next && next.classList && next.classList.contains('js-inline-error'))) {
+        next = document.createElement('div');
+        next.className = 'error-text js-inline-error';
+        el.insertAdjacentElement('afterend', next);
+      }
+      next.textContent = msg;
+    }
+
+    function clearFieldError(el){
+      el.classList.remove('input-invalid');
+      el.removeAttribute('aria-invalid');
+      if (el.id === 'instructor_email') {
+        var emailMsg = document.getElementById('instructor_email_msg');
+        if (emailMsg) emailMsg.textContent = '';
+      } else {
+        var next = el.nextElementSibling;
+        if (next && next.classList && next.classList.contains('js-inline-error')) next.textContent = '';
+      }
+    }
+
+    function validateField(el){
+      if (!el || el.disabled || el.type === 'hidden') return true;
+
+      // Only validate text/email/select (textareas are not required per your request)
+      var tag = el.tagName.toLowerCase();
+      var type = (el.type || '').toLowerCase();
+      if (tag !== 'select' && !(tag === 'input' && (type === 'text' || type === 'email'))) return true;
+
+      // Respect the "required" attribute (discipline_other becomes required dynamically)
+      var isRequired = el.hasAttribute('required');
+      var val = (el.value || '').trim();
+
+      // Determine validity
+      var valid = true, message = '';
+      if (tag === 'select') {
+        valid = !isRequired || !!val;
+        if (!valid) message = 'Please choose an option.';
+      } else if (type === 'email') {
+        var EMAIL_RX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+        valid = !isRequired ? true : (val.length > 0 && EMAIL_RX.test(val));
+        if (!valid) message = val ? 'Enter a valid email address (e.g., name@domain.com).' : 'Please enter an email address.';
+      } else { // text
+        valid = !isRequired ? true : (val.length > 0);
+        if (!valid) message = 'Please complete this field.';
+      }
+
+      if (valid) { clearFieldError(el); return true; }
+      setFieldError(el, message);
+      return false;
+    }
+
+    function validateRequiredFields(){
+      var firstBad = null, allOK = true;
+      var fields = form.querySelectorAll('input[type="text"], input[type="email"], select');
+      fields.forEach(function(el){
+        // Skip hidden/disabled and skip discipline_other unless it's required (toggle handled elsewhere)
+        if (el.disabled || el.type === 'hidden') return;
+        if (el.id === 'discipline_other' && !el.hasAttribute('required')) { clearFieldError(el); return; }
+        var ok = validateField(el);
+        if (!ok && !firstBad) firstBad = el;
+        if (!ok) allOK = false;
+      });
+
+      if (firstBad) {
+        firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstBad.focus({ preventScroll: true });
+      }
+      return allOK;
+    }
+
+    // validate on the fly
+    form.addEventListener('input', function(e){ validateField(e.target); });
+    form.addEventListener('change', function(e){ validateField(e.target); });
+
+    form.addEventListener('reset', function(){
+      setTimeout(function(){
+        // clear inline errors after reset
+        var fields = form.querySelectorAll('.input-invalid');
+        fields.forEach(clearFieldError);
+        // also clear fieldset error states
+        ['directIntruct','feedback','infoRespond','groupDiscuss','other','predictable','monitorEngagement','studentOne','studentTwo','studentThree']
+          .forEach(clearFsError);
+        updateRSIBadge();
+        updateSubstantiveStatus();
+      }, 0);
+    });
+
+    // --- Summary builder (unchanged except for computed Substantive/overall) ---
+    function generateSummary(){
+      var data = new FormData(form);
+      var date = new Date().toLocaleString();
+      var course = data.get('course')||'';
+      var semester = data.get('semester')||'';
+      var reviewer = data.get('reviewer')||'';
+      var dept = data.get('dept')||'';
+      var discipline = data.get('discipline') || data.get('discipline_other') || '';
+
+      var a1 = ynToText(getRadio('selectA1'));
+      var a2 = ynToText(getRadio('selectA2'));
+      var a3 = ynToText(getRadio('selectA3'));
+      var a4 = ynToText(getRadio('selectA4'));
+      var a5 = ynToText(getRadio('selectA5'));
+      var b1 = ynToText(getRadio('predictableSch'));
+      var b2 = ynToText(getRadio('monitoringEngagement'));
+      var c1 = ynToText(getRadio('interactionStudent'));
+      var c2 = ynToText(getRadio('regularInteractionStudent'));
+      var c3 = ynToText(getRadio('ProvidingGideance'));
+
+      var A11 = data.get('A11')||''; var A21 = data.get('A21')||''; var A31 = data.get('A31')||'';
+      var A41 = data.get('A41')||''; var A51 = data.get('A51')||'';
+      var B11 = data.get('B11')||''; var B21 = data.get('B21')||'';
+      var C11 = data.get('C11')||''; var C21 = data.get('C21')||''; var C31 = data.get('C31')||'';
+
+      var rsi = computeRSI();
+      var overall = rsi.meets ? 'Meets RSI' : 'Does Not Meet RSI';
+      var substantiveRow = rsi.meets ? 'Meets' : 'Does Not Meet';
+
+      var html = '<!doctype html>\n<html><head><meta charset="utf-8"><title>DE Peer Review Summary</title>'+
+      '<style>body{font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#111827;line-height:1.4;padding:24px;}h1{font-size:20px;margin:0 0 4px 0}h2{font-size:16px;margin:18px 0 6px 0}.meta{margin-bottom:12px;font-size:14px}table{width:100%;border-collapse:collapse;font-size:14px}th,td{border:1px solid #e5e7eb;padding:8px;vertical-align:top}th{background:#f9fafb;text-align:left}.small{color:#6b7280;font-size:12px}@media print{.noprint{display:none}}</style></head><body>'+
+      '<div class="noprint" style="text-align:right;margin-bottom:10px"><button onclick="window.print()" style="padding:6px 10px">Print</button></div>'+
+      '<h1>Distance Education Course Peer Review — Summary</h1>'+
+      '<div class="meta">'+
+      '<div><strong>Course:</strong> '+esc(course)+'</div>'+
+      '<div><strong>Semester:</strong> '+esc(semester)+'</div>'+
+      '<div><strong>Department:</strong> '+esc(dept)+'</div>'+
+      '<div><strong>Discipline:</strong> ' + esc(discipline) + '</div>' +
+      '<div><strong>Reviewer:</strong> '+esc(reviewer)+'</div>'+
+      '<div class="small">Generated: '+esc(date)+'</div>'+
+      '<div><strong>Overall RSI (Title 5 §55204):</strong> ' + overall + ' — Evidence ' + rsi.count + '/5</div>'+
+      '</div>'+
+
+      '<h2>Part I: Instructor Contact</h2>'+
+      '<table><tr><th style="width:45%">Criterion</th><th style="width:20%">Result</th><th>Notes / Examples</th></tr>'+
+      '<tr><td>Substantive Interaction</td><td>'+esc(substantiveRow)+'</td><td></td></tr>'+
+      '<tr><td>1) Direct Instruction</td><td>'+esc(a1)+'</td><td>'+esc(A11)+'</td></tr>'+
+      '<tr><td>2) Assessment & Feedback</td><td>'+esc(a2)+'</td><td>'+esc(A21)+'</td></tr>'+
+      '<tr><td>3) Responding to Questions</td><td>'+esc(a3)+'</td><td>'+esc(A31)+'</td></tr>'+
+      '<tr><td>4) Facilitating Group Discussion</td><td>'+esc(a4)+'</td><td>'+esc(A41)+'</td></tr>'+
+      '<tr><td>5) Other Approved Activities</td><td>'+esc(a5)+'</td><td>'+esc(A51)+'</td></tr></table>'+
+
+      '<h2>Part I-B: Regular Interaction</h2>'+
+      '<table><tr><th>Criterion</th><th>Result</th><th>Notes / Examples</th></tr>'+
+      '<tr><td>1) Predictable & Scheduled Interaction</td><td>'+esc(b1)+'</td><td>'+esc(B11)+'</td></tr>'+
+      '<tr><td>2) Monitoring Engagement & Proactive Interaction</td><td>'+esc(b2)+'</td><td>'+esc(B21)+'</td></tr></table>'+
+
+      '<h2>Part II: Student-to-Student Interaction</h2>'+
+      '<table><tr><th>Criterion</th><th>Result</th><th>Notes / Examples</th></tr>'+
+      '<tr><td>1) Opportunities to Initiate Interaction</td><td>'+esc(c1)+'</td><td>'+esc(C11)+'</td></tr>'+
+      '<tr><td>2) Regular & Substantive Peer Interaction</td><td>'+esc(c2)+'</td><td>'+esc(C21)+'</td></tr>'+
+      '<tr><td>3) Participation Guidance & Evaluation</td><td>'+esc(c3)+'</td><td>'+esc(C31)+'</td></tr></table>'+
+
+      '<p class="small">Reference: 34 CFR 600.2 (Regular and Substantive Interaction); Title 5 § 55204 (Instructor Contact).</p>'+
+      '</body></html>';
+
+      var w = window.open('', '_blank');
+      if (!w) { alert('Pop-up blocked. Please allow pop-ups for summary preview.'); return; }
+      w.document.open(); w.document.write(html); w.document.close(); w.focus();
+    }
+
+    // --- Buttons & submission ---
+    var submitBtn = $('#submitBtn');
+    var summaryBtn = $('#summaryBtn');
+    var summaryLink = $('#summaryLink');
+    var ok = $('#status-ok');
+    var err = $('#status-err');
+
+    if (summaryBtn) summaryBtn.addEventListener('click', generateSummary);
+    if (summaryLink) summaryLink.addEventListener('click', generateSummary);
+
+    form.addEventListener('submit', function(e){
+      hide(ok); hide(err);
+
+      // Validate all required text/select fields + radio groups
+      var okFields = validateRequiredFields();
+      var okRadios = radiosValid();
+
+      if (!okFields || !okRadios) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return;
+      }
+
+      // If you keep the placeholder action, let native POST happen (no fetch)
+      if (form.action.indexOf('YOUR_FORMSPREE_OR_BASIN_ENDPOINT') !== -1) { return; }
+
+      // AJAX submit (if you've set a real endpoint)
+      e.preventDefault();
+      submitBtn.disabled = true;
+      updateRSIBadge();
+
+      var data = new FormData(form);
+      fetch(form.action, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } })
+        .then(function(res){ if (res.ok) { form.reset(); show(ok); } else { show(err); } })
+        .catch(function(){ show(err); })
+        .then(function(){ submitBtn.disabled = false; });
+    });
+  });
+  </script>
+</body>
+</html>
