@@ -141,9 +141,16 @@
         var y = yearEl.value || '';
         hidden.value = (t && y) ? (t + ' ' + y) : '';
       }
-      var currentYear = String(new Date().getFullYear());
-      var hasYear = Array.from(yearEl.options).some(function(o){ return o.value === currentYear || o.text === currentYear; });
-      if (hasYear) yearEl.value = currentYear;
+     // var currentYear = String(new Date().getFullYear());
+    // var hasYear = Array.from(yearEl.options).some(function(o){ return o.value === currentYear || o.text === currentYear; });
+     // if (hasYear) yearEl.value = currentYear;
+
+
+
+		var currentYear = String(new Date().getFullYear());
+		yearEl.value = currentYear; // options are injected by initYearOptions()
+
+		
 
       termEl.addEventListener('change', sync);
       yearEl.addEventListener('change', sync);
@@ -403,14 +410,21 @@
               <option>Fall</option>
               <option>Winter</option>
             </select>
-            <select id="semester_year" name="semester_year" required>
-              <option value="" disabled>Select year…</option>
-              <option>2025</option>
-              <option>2026</option>
-              <option>2027</option>
-              <option>2028</option>
-              <option>2029</option>
-            </select>
+
+
+
+
+			<select id="semester_year" name="semester_year" required>
+ 			 <!-- populated by JS: previous/current/next -->
+			</select>
+
+
+
+
+
+
+			  
+          
           </div>
         </div>
         <input type="hidden" id="semester" name="semester">
@@ -1109,5 +1123,57 @@ btn.addEventListener('click', function(){
     });
   });
   </script>
+
+
+
+
+
+
+<script>
+(function(){
+  function initYearOptions(){
+    var yearEl = document.getElementById('semester_year');
+    if (!yearEl) return;
+
+    var current = new Date().getFullYear();
+    var years = [current - 1, current, current + 1];
+
+    // Clear any existing options
+    while (yearEl.firstChild) yearEl.removeChild(yearEl.firstChild);
+
+    // Placeholder
+    var ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = 'Select year…';
+    ph.disabled = true;
+    yearEl.appendChild(ph);
+
+    // Year options
+    years.forEach(function(y){
+      var opt = document.createElement('option');
+      opt.value = String(y);
+      opt.textContent = String(y);
+      yearEl.appendChild(opt);
+    });
+
+    // Default to current year
+    yearEl.value = String(current);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initYearOptions);
+  } else {
+    initYearOptions();
+  }
+})();
+</script>
+
+
+
+
+
+
+
+	
 </body>
 </html>
