@@ -665,13 +665,52 @@
         btn.setAttribute('aria-expanded','false');
         content.setAttribute('hidden',''); content.style.display = 'none';
 
-        btn.addEventListener('click', function(){
-          var isHidden = content.hasAttribute('hidden');
-          btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
-          btn.classList.toggle('active', isHidden);
-          if (isHidden){ content.removeAttribute('hidden'); content.style.display = 'block'; }
-          else { content.setAttribute('hidden',''); content.style.display = 'none'; }
-        });
+        //btn.addEventListener('click', function(){
+        //  var isHidden = content.hasAttribute('hidden');
+       //   btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+       //   btn.classList.toggle('active', isHidden);
+       //   if (isHidden){ content.removeAttribute('hidden'); content.style.display = 'block'; }
+       //   else { content.setAttribute('hidden',''); content.style.display = 'none'; }
+      //  });
+
+
+
+
+
+
+
+
+
+btn.addEventListener('click', function(){
+  var isHidden = content.hasAttribute('hidden');
+  btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+  btn.classList.toggle('active', isHidden);
+
+  if (isHidden){
+    content.removeAttribute('hidden');
+    content.style.display = 'block';
+
+    // NEW: focus the first textarea/input/select inside the opened content
+    setTimeout(function(){
+      var target = content.querySelector('textarea, input:not([type="hidden"]), select');
+      if (target) target.focus();
+    }, 0);
+
+  } else {
+    content.setAttribute('hidden','');
+    content.style.display = 'none';
+  }
+});
+
+
+
+
+
+
+
+
+
+		  
       });
     }
     attachToggles();
