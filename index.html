@@ -748,13 +748,14 @@
 
       '<p class="small">Reference: 34 CFR 600.2; Title 5 § 55204.</p>' +
 
-     '<script>' +
+    '<script>' +
 '(function(){' +
-'  var btn=document.getElementById(\"copyBtn\");' +
-'  var status=document.getElementById(\"copyStatus\");' +
-'  if(!btn) return;' +
+'  var btn = document.getElementById(\"copyBtn\");' +
+'  var status = document.getElementById(\"copyStatus\");' +
+'  var box = document.getElementById(\"summaryContent\");' +
+'  if(!btn || !box) return;' +
 
-'  function showStatus(msg, ok){' +
+'  function show(msg, ok){' +
 '    if(!status) return;' +
 '    status.style.display=\"block\";' +
 '    status.style.color = ok ? \"#065f46\" : \"#991b1b\";' +
@@ -762,61 +763,20 @@
 '    setTimeout(function(){ status.style.display=\"none\"; }, 1800);' +
 '  }' +
 
-'  function getCopyContainer(){' +
-'    // Clone body, remove noprint elements, return container' +
-'    var c=document.createElement(\"div\");' +
-'    c.innerHTML=document.body.innerHTML;' +
-'    var nps=c.querySelectorAll(\".noprint\");' +
-'    for(var i=0;i<nps.length;i++) nps[i].remove();' +
-'    return c;' +
-'  }' +
-
-'  function execCommandCopyFrom(node){' +
-'    try{' +
-'      var sel=window.getSelection();' +
-'      sel.removeAllRanges();' +
-'      var range=document.createRange();' +
-'      range.selectNodeContents(node);' +
-'      sel.addRange(range);' +
-'      var ok=document.execCommand(\"copy\");' +
-'      sel.removeAllRanges();' +
-'      return ok;' +
-'    }catch(e){ return false; }' +
-'  }' +
-
 '  btn.addEventListener(\"click\", function(e){' +
 '    e.preventDefault();' +
-'    var c=getCopyContainer();' +
-'    var html=\"<!doctype html><html><head><meta charset=\\\\\"utf-8\\\\\"></head><body>\"+c.innerHTML+\"</body></html>\";' +
-'    var text=c.innerText;' +
-
-'    // Try rich copy (Chrome supports this on HTTPS)' +
-'    (async function(){' +
-'      try{' +
-'        if(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem){' +
-'          var item=new ClipboardItem({' +
-'            \"text/html\": new Blob([html], {type:\"text/html\"}),' +
-'            \"text/plain\": new Blob([text], {type:\"text/plain\"})' +
-'          });' +
-'          await navigator.clipboard.write([item]);' +
-'          showStatus(\"Copied (rich).\", true);' +
-'          return;' +
-'        }' +
-'      }catch(err){}' +
-
-'      // Fallback: plain text' +
-'      try{' +
-'        if(navigator.clipboard && navigator.clipboard.writeText){' +
-'          await navigator.clipboard.writeText(text);' +
-'          showStatus(\"Copied (text).\", true);' +
-'          return;' +
-'        }' +
-'      }catch(err2){}' +
-
-'      // Final fallback: selection-based copy (very compatible)' +
-'      var ok=execCommandCopyFrom(c);' +
-'      showStatus(ok?\"Copied.\":\"Copy failed (browser blocked clipboard).\", ok);' +
-'    })();' +
+'    try {' +
+'      var sel = window.getSelection();' +
+'      sel.removeAllRanges();' +
+'      var range = document.createRange();' +
+'      range.selectNodeContents(box);' +
+'      sel.addRange(range);' +
+'      var ok = document.execCommand(\"copy\");' +
+'      sel.removeAllRanges();' +
+'      show(ok ? \"Copied.\" : \"Copy failed.\", ok);' +
+'    } catch (err) {' +
+'      show(\"Copy failed.\", false);' +
+'    }' +
 '  });' +
 '})();' +
 '<\\/script>'
