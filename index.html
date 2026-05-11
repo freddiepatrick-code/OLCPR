@@ -1048,8 +1048,27 @@ btn.addEventListener('click', function(){
 
       var html = '<!doctype html>\n<html><head><meta charset="utf-8"><title>DE Peer Review Summary</title>'+
       '<style>body{font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#111827;line-height:1.4;padding:24px;}h1{font-size:20px;margin:0 0 4px 0}h2{font-size:16px;margin:18px 0 6px 0}.meta{margin-bottom:12px;font-size:14px}table{width:100%;border-collapse:collapse;font-size:14px}th,td{border:1px solid #e5e7eb;padding:8px;vertical-align:top}th{background:#f9fafb;text-align:left}.small{color:#6b7280;font-size:12px}@media print{.noprint{display:none}}</style></head><body>'+
-      '<div class="noprint" style="text-align:right;margin-bottom:10px"><button onclick="window.print()" style="padding:6px 10px">Print</button></div>'+
-      '<h1>Distance Education Course Peer Review — Summary</h1>'+
+
+
+	
+
+  
+
+      '<div class="noprint" style="text-align:right;margin-bottom:10px;display:flex;gap:8px;justify-content:flex-end">' +
+      '<button id="copyBtn" style="padding:6px 10px">Copy</button>' +
+      '<button onclick="window.print()" style="padding:6px 10px">Print</button>' +
+      '</div>' +
+      '<div id="copyStatus" class="small noprint" style="text-align:right;display:none;margin:-6px 0 10px 0;font-weight:600"></div>'
+
+
+
+
+
+
+		
+		  
+		  
+	  '<h1>Distance Education Course Peer Review — Summary</h1>'+
       '<div class="meta">'+
       '<div><strong>Course:</strong> '+esc(course)+'</div>'+
       '<div><strong>Semester:</strong> '+esc(semester)+'</div>'+
@@ -1088,6 +1107,90 @@ btn.addEventListener('click', function(){
       + '</table>'
 
       '<p class="small">Reference: 34 CFR 600.2 (Regular and Substantive Interaction); Title 5 § 55204 (Instructor Contact).</p>'+
+
+
+
+
+
+
+      '<script>' +
+'  (function(){' +
+'    var btn = document.getElementById("copyBtn");' +
+'    var status = document.getElementById("copyStatus");' +
+'    if(!btn) return;' +
+
+'    function showStatus(msg, ok){' +
+'      if(!status) return;' +
+'      status.style.display = "block";' +
+'      status.style.color = ok ? "#065f46" : "#991b1b";' +
+'      status.textContent = msg;' +
+'      setTimeout(function(){ status.style.display = "none"; }, 1800);' +
+'    }' +
+
+'    function getRichHTML(){' +
+'      // Copy the main content without the buttons' +
+'      var clone = document.body.cloneNode(true);' +
+'      var nps = clone.querySelectorAll(".noprint");' +
+'      for (var i=0;i<nps.length;i++) nps[i].remove();' +
+'      return "<!doctype html><html><head><meta charset=\\"utf-8\\"></head><body>" + clone.innerHTML + "</body></html>";' +
+'    }' +
+
+'    btn.addEventListener("click", async function(e){' +
+'      e.preventDefault();' +
+
+'      var rich = getRichHTML();' +
+'      var text = document.body.innerText;' +
+
+'      // 1) Try rich HTML copy' +
+'      try {' +
+'        if (navigator.clipboard && navigator.clipboard.write) {' +
+'          var item = new ClipboardItem({' +
+'            "text/html": new Blob([rich], {type: "text/html"}),' +
+'            "text/plain": new Blob([text], {type: "text/plain"})' +
+'          });' +
+'          await navigator.clipboard.write([item]);' +
+'          showStatus("Copied (rich).", true);' +
+'          return;' +
+'        }' +
+'      } catch (err) {' +
+'        // fall through to plain text' +
+'      }' +
+
+'      // 2) Plain text fallback' +
+'      try {' +
+'        if (navigator.clipboard && navigator.clipboard.writeText) {' +
+'          await navigator.clipboard.writeText(text);' +
+'          showStatus("Copied (text).", true);' +
+'          return;' +
+'        }' +
+'      } catch (err2) {' +
+'        // fall through' +
+'      }' +
+
+'      // 3) Old-school execCommand fallback' +
+'      try {' +
+'        var ta = document.createElement("textarea");' +
+'        ta.value = text;' +
+'        ta.style.position = "fixed";' +
+'        ta.style.left = "-9999px";' +
+'        document.body.appendChild(ta);' +
+'        ta.focus(); ta.select();' +
+'        var ok = document.execCommand("copy");' +
+'        document.body.removeChild(ta);' +
+'        showStatus(ok ? "Copied (text)." : "Copy failed.", ok);' +
+'      } catch (err3) {' +
+'        showStatus("Copy failed.", false);' +
+'      }' +
+'    });' +
+'  })();' +
+'</script>'
+
+		  
+
+
+
+
+		  
       '</body></html>';
 
       var w = window.open('', '_blank');
