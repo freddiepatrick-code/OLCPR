@@ -155,7 +155,7 @@
       termEl.addEventListener('change', sync);
       yearEl.addEventListener('change', sync);
 
-      if (form) form.addEventListener('reset', function(){ setTimeout(function(){ if (hasYear) yearEl.value = currentYear; sync(); }, 0); });
+      if (form) form.addEventListener('reset', function(){ setTimeout(function(){ yearEl.value = currentYear; sync(); }, 0); });
       sync();
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initTermYear);
@@ -913,6 +913,28 @@ btn.addEventListener('click', function(){
     // --- Inline field validation for text/selects ---
     var form = document.getElementById('theForm');
 
+    // --- Snapshot last submission so "View Summary" works after form.reset() ---
+    var lastSubmission = null;
+    function snapshotSubmission(){
+      var fd = new FormData(form);
+      var obj = {};
+      fd.forEach(function(value, key){
+        if (obj[key] !== undefined) {
+          if (!Array.isArray(obj[key])) obj[key] = [obj[key]];
+          obj[key].push(value);
+        } else {
+          obj[key] = value;
+        }
+      });
+      return obj;
+    }
+    function getFrom(dataObj, key){
+      var v = dataObj && dataObj[key];
+      if (Array.isArray(v)) return v[0] || '';
+      return v || '';
+    }
+
+
     function setFieldError(el, msg){
       el.classList.add('input-invalid');
       el.setAttribute('aria-invalid','true');
@@ -1014,37 +1036,43 @@ btn.addEventListener('click', function(){
 
     // --- Summary builder (unchanged except for computed Substantive/overall) ---
     function generateSummary(){
-      var data = new FormData(form);
+      var dataObj = lastSubmission || snapshotSubmission();
       var date = new Date().toLocaleString();
-      var course = data.get('course')||'';
-      var semester = data.get('semester')||'';
-      var reviewer = data.get('reviewer')||'';
-      var dept = data.get('dept')||'';
-      var discipline = data.get('discipline') || data.get('discipline_other') || '';
+      var course = getFrom(dataObj,'course')||'';
+      var semester = getFrom(dataObj,'semester')||'';
+      var reviewer = getFrom(dataObj,'reviewer')||'';
+      var dept = getFrom(dataObj,'dept')||'';
+      var discipline = getFrom(dataObj,'discipline') || getFrom(dataObj,'discipline_other') || '';
 
-      var a1 = ynToText(getRadio('selectA1'));
-      var a2 = ynToText(getRadio('selectA2'));
-      var a3 = ynToText(getRadio('selectA3'));
-      var a4 = ynToText(getRadio('selectA4'));
-      var a5 = ynToText(getRadio('selectA5'));
-      var b1 = ynToText(getRadio('predictableSch'));
-      var b2 = ynToText(getRadio('monitoringEngagement'));
-      var c1 = ynToText(getRadio('interactionStudent'));
-      var c2 = ynToText(getRadio('regularInteractionStudent'));
-      var c3 = ynToText(getRadio('ProvidingGideance'));
+      var a1 = ynToText(getFrom(dataObj,'selectA1'));
+      var a2 = ynToText(getFrom(dataObj,'selectA2'));
+      var a3 = ynToText(getFrom(dataObj,'selectA3'));
+      var a4 = ynToText(getFrom(dataObj,'selectA4'));
+      var a5 = ynToText(getFrom(dataObj,'selectA5'));
+      var b1 = ynToText(getFrom(dataObj,'predictableSch'));
+      var b2 = ynToText(getFrom(dataObj,'monitoringEngagement'));
+      var c1 = ynToText(getFrom(dataObj,'interactionStudent'));
+      var c2 = ynToText(getFrom(dataObj,'regularInteractionStudent'));
+      var c3 = ynToText(getFrom(dataObj,'ProvidingGideance'));
 
-      var A11 = data.get('A11')||''; var A21 = data.get('A21')||''; var A31 = data.get('A31')||'';
-      var A41 = data.get('A41')||''; var A51 = data.get('A51')||'';
-      var B11 = data.get('B11')||''; var B21 = data.get('B21')||'';
-      var C11 = data.get('C11')||''; var C21 = data.get('C21')||''; var C31 = data.get('C31')||'';
+      var A11 = getFrom(dataObj,'A11')||''; var A21 = getFrom(dataObj,'A21')||''; var A31 = getFrom(dataObj,'A31')||'';
+      var A41 = getFrom(dataObj,'A41')||''; var A51 = getFrom(dataObj,'A51')||'';
+      var B11 = getFrom(dataObj,'B11')||''; var B21 = getFrom(dataObj,'B21')||'';
+      var C11 = getFrom(dataObj,'C11')||''; var C21 = getFrom(dataObj,'C21')||''; var C31 = getFrom(dataObj,'C31')||'';
 
-	  var D1 = data.get('D1') || '';
-      var D2 = data.get('D2') || '';
-      var D3 = data.get('D3') || '';
+	  var D1 = getFrom(dataObj,'D1') || '';
+      var D2 = getFrom(dataObj,'D2') || '';
+      var D3 = getFrom(dataObj,'D3') || '';
 
-      var rsi = computeRSI();
-      var overall = rsi.meets ? 'Meets RSI' : 'Does Not Meet RSI';
-      var substantiveRow = rsi.meets ? 'Meets' : 'Does Not Meet';
+      // Compute evidence count from submitted values (works even after form.reset())
+      var evidenceCount = 0;
+      ['selectA1','selectA2','selectA3','selectA4','selectA5'].forEach(function(k){
+        if (getFrom(dataObj, k) === 'yes') evidenceCount++;
+      });
+
+      // Prefer the computed status stored on submit, but fall back to evidenceCount if needed
+      var overall = getFrom(dataObj, 'rsi_overall') || (evidenceCount >= 2 ? 'Meets RSI' : 'Does Not Meet RSI');
+      var substantiveRow = (evidenceCount >= 2) ? 'Meets' : 'Does Not Meet';
 
       var html = '<!doctype html>\n<html><head><meta charset="utf-8"><title>DE Peer Review Summary</title>'+
       '<style>body{font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#111827;line-height:1.4;padding:24px;}h1{font-size:20px;margin:0 0 4px 0}h2{font-size:16px;margin:18px 0 6px 0}.meta{margin-bottom:12px;font-size:14px}table{width:100%;border-collapse:collapse;font-size:14px}th,td{border:1px solid #e5e7eb;padding:8px;vertical-align:top}th{background:#f9fafb;text-align:left}.small{color:#6b7280;font-size:12px}@media print{.noprint{display:none}}</style></head><body>'+
@@ -1076,7 +1104,7 @@ btn.addEventListener('click', function(){
       '<div><strong>Discipline:</strong> ' + esc(discipline) + '</div>' +
       '<div><strong>Reviewer:</strong> '+esc(reviewer)+'</div>'+
       '<div class="small">Generated: '+esc(date)+'</div>'+
-      '<div><strong>Overall RSI (Title 5 §55204):</strong> ' + overall + ' — Evidence ' + rsi.count + '/5</div>'+
+      '<div><strong>Overall RSI (Title 5 §55204):</strong> ' + overall + ' — Evidence ' + evidenceCount + '/5</div>'+
       '</div>'+
 
       '<h2>Part I: Instructor Contact</h2>'+
@@ -1231,7 +1259,7 @@ btn.addEventListener('click', function(){
 
       var data = new FormData(form);
       fetch(form.action, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } })
-        .then(function(res){ if (res.ok) { form.reset(); show(ok); } else { show(err); } })
+        .then(function(res){ if (res.ok) { lastSubmission = snapshotSubmission(); form.reset(); show(ok); } else { show(err); } })
         .catch(function(){ show(err); })
         .then(function(){ submitBtn.disabled = false; });
     });
