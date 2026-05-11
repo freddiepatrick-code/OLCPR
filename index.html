@@ -1313,7 +1313,39 @@ btn.addEventListener('click', function(){
 
 
 
+<script>
+/* Bulletproof collapsibles: works even if other scripts error out */
+document.addEventListener('click', function (e) {
+  var btn = e.target.closest ? e.target.closest('.collapsible') : null;
+  if (!btn) return;
 
+  // Find the next sibling with class="content"
+  var content = btn.nextElementSibling;
+  while (content && !(content.classList && content.classList.contains('content'))) {
+    content = content.nextElementSibling;
+  }
+  if (!content) return;
+
+  var isHidden = content.hasAttribute('hidden');
+
+  btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+  btn.classList.toggle('active', isHidden);
+
+  if (isHidden) {
+    content.removeAttribute('hidden');
+    content.style.display = 'block';
+
+    // Focus first input/textarea/select in the opened panel
+    setTimeout(function () {
+      var target = content.querySelector('textarea, input:not([type="hidden"]), select');
+      if (target) target.focus();
+    }, 0);
+  } else {
+    content.setAttribute('hidden', '');
+    content.style.display = 'none';
+  }
+});
+</script>
 
 
 	
