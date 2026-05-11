@@ -1038,6 +1038,10 @@ btn.addEventListener('click', function(){
       var B11 = data.get('B11')||''; var B21 = data.get('B21')||'';
       var C11 = data.get('C11')||''; var C21 = data.get('C21')||''; var C31 = data.get('C31')||'';
 
+	  var D1 = data.get('D1') || '';
+      var D2 = data.get('D2') || '';
+      var D3 = data.get('D3') || '';
+
       var rsi = computeRSI();
       var overall = rsi.meets ? 'Meets RSI' : 'Does Not Meet RSI';
       var substantiveRow = rsi.meets ? 'Meets' : 'Does Not Meet';
@@ -1075,6 +1079,13 @@ btn.addEventListener('click', function(){
       '<tr><td>1) Opportunities to Initiate Interaction</td><td>'+esc(c1)+'</td><td>'+esc(C11)+'</td></tr>'+
       '<tr><td>2) Regular & Substantive Peer Interaction</td><td>'+esc(c2)+'</td><td>'+esc(C21)+'</td></tr>'+
       '<tr><td>3) Participation Guidance & Evaluation</td><td>'+esc(c3)+'</td><td>'+esc(C31)+'</td></tr></table>'+
+
+	  + '<h2>Follow Up: Conversation</h2>'
+      + '<table><tr><th style="width:35%">Topic</th><th>Notes</th></tr>'
+      + '<tr><td>Exceptional techniques/methods reviewed that improve RSI</td><td>' + esc(D1) + '</td></tr>'
+      + '<tr><td>Possible changes discussed that may improve RSI</td><td>' + esc(D2) + '</td></tr>'
+      + '<tr><td>Methods/techniques/adoptions that will be employed to improve RSI</td><td>' + esc(D3) + '</td></tr>'
+      + '</table>'
 
       '<p class="small">Reference: 34 CFR 600.2 (Regular and Substantive Interaction); Title 5 § 55204 (Instructor Contact).</p>'+
       '</body></html>';
