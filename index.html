@@ -703,7 +703,23 @@
       var html =
       '<!doctype html><html><head><meta charset="utf-8"><title>DE Peer Review Summary</title>' +     
 	  '<style>body{font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#111827;line-height:1.4;padding:24px;}h1{font-size:20px;margin:0 0 4px 0}h2{font-size:16px;margin:18px 0 6px 0}.meta{margin-bottom:12px;font-size:14px}table{width:100%;border-collapse:collapse;font-size:14px}th,td{border:1px solid #e5e7eb;padding:8px;vertical-align:top}th{background:#f9fafb;text-align:left}.small{color:#6b7280;font-size:12px}@media print{.noprint{display:none}}#copyBtn,#printBtn{cursor:pointer;}</style></head><body>' +
-	  '<div class="noprint" style="text-align:right;margin-bottom:10px;display:flex;gap:8px;justify-content:flex-end">' +
+	 
+		  
+	   + '<div class="noprint" style="text-align:right;margin-bottom:10px;display:flex;gap:8px;justify-content:flex-end">' +
+       '<button id="copyBtn" style="padding:6px 10px;cursor:pointer;">Copy</button>' +
+       '<button id="printBtn" onclick="window.print()" style="padding:6px 10px;cursor:pointer;">Print</button>' +
+       '</div>' +
+       '<div id="copyStatus" class="small noprint" style="text-align:right;display:none;margin:-6px 0 10px 0;font-weight:600"></div>' +
+       '<div id="summaryContent">' +
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  '<div class="noprint" style="text-align:right;margin-bottom:10px;display:flex;gap:8px;justify-content:flex-end">' +
       '<button id="copyBtn" style="padding:6px 10px">Copy</button>' +
       '<button onclick="window.print()" style="padding:6px 10px">Print</button>' +
       '</div>' +
@@ -748,38 +764,45 @@
 
       '<p class="small">Reference: 34 CFR 600.2; Title 5 § 55204.</p>' +
 
-    '<script>' +
-'(function(){' +
-'  var btn = document.getElementById(\"copyBtn\");' +
-'  var status = document.getElementById(\"copyStatus\");' +
-'  var box = document.getElementById(\"summaryContent\");' +
-'  if(!btn || !box) return;' +
+    + '</div>' +  /* closes #summaryContent */
 
-'  function show(msg, ok){' +
-'    if(!status) return;' +
-'    status.style.display=\"block\";' +
-'    status.style.color = ok ? \"#065f46\" : \"#991b1b\";' +
-'    status.textContent = msg;' +
-'    setTimeout(function(){ status.style.display=\"none\"; }, 1800);' +
-'  }' +
-
-'  btn.addEventListener(\"click\", function(e){' +
-'    e.preventDefault();' +
-'    try {' +
-'      var sel = window.getSelection();' +
-'      sel.removeAllRanges();' +
-'      var range = document.createRange();' +
-'      range.selectNodeContents(box);' +
-'      sel.addRange(range);' +
-'      var ok = document.execCommand(\"copy\");' +
-'      sel.removeAllRanges();' +
-'      show(ok ? \"Copied.\" : \"Copy failed.\", ok);' +
-'    } catch (err) {' +
-'      show(\"Copy failed.\", false);' +
-'    }' +
-'  });' +
-'})();' +
-'<\\/script>'
+  '<script>' +
+  '(function(){' +
+  '  var btn=document.getElementById(\"copyBtn\");' +
+  '  var status=document.getElementById(\"copyStatus\");' +
+  '  var box=document.getElementById(\"summaryContent\");' +
+  '  if(!btn||!box) return;' +
+  '  function show(msg, ok){' +
+  '    if(!status) return;' +
+  '    status.style.display=\"block\";' +
+  '    status.style.color = ok ? \"#065f46\" : \"#991b1b\";' +
+  '    status.textContent = msg;' +
+  '    setTimeout(function(){ status.style.display=\"none\"; }, 1800);' +
+  '  }' +
+  '  btn.addEventListener(\"click\", function(e){' +
+  '    e.preventDefault();' +
+  '    var text = box.innerText || \"\";' +
+  '    if (navigator.clipboard && navigator.clipboard.writeText) {' +
+  '      navigator.clipboard.writeText(text).then(function(){ show(\"Copied.\", true); }).catch(function(){ fallback(); });' +
+  '      return;' +
+  '    }' +
+  '    fallback();' +
+  '    function fallback(){' +
+  '      try {' +
+  '        var ta=document.createElement(\"textarea\");' +
+  '        ta.value=text;' +
+  '        ta.style.position=\"fixed\";' +
+  '        ta.style.left=\"-9999px\";' +
+  '        document.body.appendChild(ta);' +
+  '        ta.focus(); ta.select();' +
+  '        var ok=document.execCommand(\"copy\");' +
+  '        document.body.removeChild(ta);' +
+  '        show(ok?\"Copied.\":\"Copy failed.\", ok);' +
+  '      } catch(err){ show(\"Copy failed.\", false); }' +
+  '    }' +
+  '  });' +
+  '})();' +
+  '<\\/script>' +
 
 
 
